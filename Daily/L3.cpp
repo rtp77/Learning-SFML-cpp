@@ -1,3 +1,4 @@
+//Font setup and displaying text 
 #include<iostream>
 #include<SFML/Graphics.hpp>
 
