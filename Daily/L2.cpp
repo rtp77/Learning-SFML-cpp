@@ -1,7 +1,7 @@
 #include<iostream>
 #include<SFML/Graphics.hpp>
 
-void main(int argc, char** argv[]) {
+int main(int argc, char** argv[]) {
 
 	//Window Setup
 	sf::RenderWindow win(sf::VideoMode(800, 360), "Second Try");
