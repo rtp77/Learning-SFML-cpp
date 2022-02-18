@@ -1,6 +1,6 @@
 #include<SFML/Graphics.hpp>
 #include<iostream>
-void main(int argc, char** argv[]) {
+int main(int argc, char** argv[]) {
 	sf::RenderWindow window(sf::VideoMode(400, 240), "New Window Created");
 	int temp = 0, a = 0;
 	int s = 0;
