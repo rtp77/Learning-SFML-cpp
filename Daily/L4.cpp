@@ -1,10 +1,11 @@
+//Simple wire loop game
 #include<iostream>
 #include<SFML/Graphics.hpp>
 int main(int argc, char** argv[]){
     sf::RenderWindow window(sf::VideoMode(800,600),"Custom Window");
     float width = window.getSize().x, height = window.getSize().y;
     bool ready = false;
-    
+
     //draw start box
     sf::RectangleShape startBox(sf::Vector2f(50,50));
     startBox.setPosition(0,height/2);
@@ -20,6 +21,9 @@ int main(int argc, char** argv[]){
     rec.setOrigin(0,rec.getSize().y/2);
     rec.setPosition(0,window.getSize().y / 2);
     rec.setFillColor(sf::Color::Green);
+
+    std::cout<<"Hover your mouse over Left Blue button and left click to begin"<<std::endl;
+    std::cout<<"Rules: Move your mouse to other blue square and tap on it, Do not touch the lava\n"<<std::endl;
 
     while(window.isOpen()){
         sf::Event event;
@@ -61,5 +65,5 @@ int main(int argc, char** argv[]){
         window.display();
     }//isopen
 }
-///NEXT UP TRY 
-///TIMER FOR SCORE COUNTING, AND IMPLEMENTATION OF AUDIO   
+///NEXT UP TRY
+///TIMER FOR SCORE COUNTING, AND IMPLEMENTATION OF AUDIO
