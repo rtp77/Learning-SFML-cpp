@@ -1,0 +1,145 @@
+#include<iostream>
+#include<math.h>
+#include<SFML/Graphics.hpp>
+#include "imgui.h"
+#include "imgui-SFML.h"
+
+int main(int argc, char** argv[]) {
+	sf::RenderWindow window(sf::VideoMode(800, 600), "SolarPanel");
+
+	float Sunx = 100, Suny = 30;
+	sf::RectangleShape sun(sf::Vector2f(Sunx,Suny));
+	sun.setFillColor(sf::Color::Yellow);
+	sun.setPosition(400, 500);
+	sun.setOrigin(Sunx/2, Suny/2);
+
+	sf::RectangleShape sunPointer(sf::Vector2f(30,10));
+	sunPointer.setFillColor(sf::Color::Yellow);
+	sunPointer.setOrigin(15,10);
+
+	sf::CircleShape earth;
+	earth.setFillColor(sf::Color::Red);
+	earth.setPosition(800, 200);
+	earth.setRadius(15);
+	earth.setOrigin(15, 15);
+
+	sf::CircleShape bullet;
+	bullet.setFillColor(sf::Color::Red);
+	bullet.setRadius(4);
+	bullet.setOrigin(2, 2);
+	bullet.setPosition(0, 0);
+
+
+	//initial sun pos
+	int sunPosx = sun.getPosition().x;
+	int sunPosy = sun.getPosition().y;
+	//initial mouse pos
+	int mousePosx = sf::Mouse::getPosition(window).x;
+	int mousePosy = sf::Mouse::getPosition(window).y;
+	//initial bullet pos
+	int bulletPosx = bullet.getPosition().x;
+	int bulletPosy = bullet.getPosition().y;
+	//initial earth pos
+	float earthPosx = earth.getPosition().x;
+	int earthPosy = earth.getPosition().y;
+	//earth speed
+	float earthspeed = 0.1;
+
+
+	sf::Clock clock;
+	bool shoot = false;
+	bool earthalive = true;
+	bool won = false;
+
+	while (window.isOpen()) {
+		sf::Event e;
+		while (window.pollEvent(e)) {
+			if (e.type == sf::Event::Closed) {
+				window.close();
+			}
+
+			//shooting
+			if (e.type == sf::Event::MouseButtonPressed) {
+				bullet.setPosition(sunPosx, 500-Suny/2);
+				shoot = true;
+				sf::Clock clock;
+				clock.restart();
+			}
+
+		}//pollevent 
+
+
+		//sun position 
+		sunPosx = sun.getPosition().x;
+		sunPosy = sun.getPosition().y;
+		sunPointer.setPosition(sunPosx,sunPosy-Suny/2);
+
+		//bullet Position
+		bulletPosx = bullet.getPosition().x;
+		bulletPosy = bullet.getPosition().y;
+		if (shoot == true) {
+			bulletPosy = bulletPosy - 0.2;
+			bullet.setPosition(bulletPosx, bulletPosy);
+		}
+
+		//bullet coloranimation
+		sf::Time t = clock.getElapsedTime();
+		int tim = std::round(t.asSeconds());
+		if (tim % 2 == 0) {
+			bullet.setFillColor(sf::Color::White);
+			earth.setRadius(13);
+			earth.setOrigin(13, 13);
+		}
+		else {
+			bullet.setFillColor(sf::Color::Red);
+			earth.setRadius(15);
+		}
+
+		//earth position
+		earthPosx = earth.getPosition().x;
+		earthPosy = earth.getPosition().y;
+		if (earthalive == true) {
+			earthPosx = earthPosx - earthspeed;
+			earth.setPosition(earthPosx,earthPosy);
+		}
+		
+		//collision
+		if (bulletPosx < earthPosx + 15 && bulletPosx > earthPosx - 15 && bulletPosy < earthPosy + 15 && bulletPosy > earthPosy - 15) {
+			earth.setFillColor(sf::Color::White);
+			won = true;
+		}
+
+		//Next round
+		if (won == true) {
+
+			earth.setPosition(800, 200);
+			earth.setFillColor(sf::Color::Red);
+			earthspeed += 0.02;
+			won = false;
+		}
+
+		//Game over 
+		if (earthPosx < 5) {
+			earth.setFillColor(sf::Color::Red);
+			earth.setRadius(50);
+			earthalive = false;
+		}
+
+
+		//mouse Position
+		mousePosx = sf::Mouse::getPosition(window).x;
+		mousePosy = sf::Mouse::getPosition(window).y;
+
+		//movement
+		sun.setPosition(mousePosx, sunPosy);
+
+
+
+		window.clear();
+		window.draw(sun);
+		window.draw(sunPointer);
+		window.draw(earth);
+		window.draw(bullet);
+		window.display();
+	}
+}
