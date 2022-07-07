@@ -1,5 +1,7 @@
 #include<SFML/Graphics.hpp>
 
+//calculate overall track path and trace it
+
 #include<iostream>
 #include<math.h>
 #include "imgui.h"
@@ -11,20 +13,34 @@ int main(int argc, char** argv[]) {
 
 	bool start = false, spoiler = false;
 	int flap = 0, aileron = 0;
-	int adjustx = 800, adjusty = 700;
-	
-	
+	int adjustx = 800, adjusty = 500;
+
+	//FullTrack
 	int arr[135][2] = { {0,0},{54.58,2.92},{64.28,2.56},{71.74,1.04},{76.6,-0.94},{82.4,-5.08},{86.06,-9.8},{89.02,-15.74},{93.18,-25.82},{97.44,-35.72},{99.92,-46.66},{100.98,-53.54},{102.4,-70.22},{103,-84.46},{103.94,-90.02},{107.38,-95.22},{113.88,-102.48},{116.62,-106.62},{116.5,-109.74},{115.3,-113.4},{106.08,-128.4},{105.48,-134.44},{106.9,-138.76},{110.22,-142.44},{119.34,-150.26},{121.46,-153.86},{121.7,-158.1},{120.16,-161.96},{114.6,-166.2},{107.5,-169.32},{97.78,-172.8},{90.22,-175.54},{84.88,-178.74},{78.74,-185.06},{66.66,-199},{0.24,-274.14},{-21.54,-294.98},{-27.7,-300.08},{-32.66,-302.8},{-38.46,-304.6},{-44.5,-305.54},{-50.06,-305.26},{-56.22,-304.4},{-61.42,-303},{-66.04,-300.74},{-69.96,-297.14},{-71.14,-295.74},{-77.06,-287.82},{-83.68,-280.74},{-90.78,-274.9},{-95.64,-271.32},{-101.08,-267.64},{-110.68,-261.6},{-132.1,-245.86},{-134.24,-245.02},{-137.2,-244.82},{-140.14,-245.68},{-149.14,-250.68},{-152.22,-251.34},{-155.3,-251.14},{-157.9,-250.48},{-161.58,-248.32},{-165.48,-245.86},{-170.34,-241.9},{-173.88,-237.66},{-176.38,-233.32},{-178.5,-228.42},{-178.74,-226.44},{-178.14,-224.46},{-176.38,-222.58},{-172.12,-218.42},{-106.76,-166.02},{-92.08,-154.42},{-89.02,-152.24},{-83.68,-150.08},{-77.3,-149.14},{-72.08,-149.04},{-64.86,-149.42},{-44.74,-151.3},{-38.1,-151.78},{-31.24,-151.96},{-23.42,-151.3},{-16.32,-150.18},{-9.94,-148},{31.74,-127.64},{34.46,-126.52},{37.78,-125.48},{41.2,-125.28},{43.8,-125.86},{46.18,-127.18},{47.6,-128.68},{54.7,-143.96},{56.84,-146.12},{59.78,-147.44},{63.22,-147.54},{67.02,-146.5},{69.38,-144.62},{70.92,-142.64},{73.88,-137.64},{76.24,-133.4},{78.02,-129.24},{78.96,-125.2},{79.56,-120.94},{79.08,-116.52},{77.66,-114.54},{74,-112},{-61.08,-36.2},{-64.74,-34.78},{-69.84,-33.18},{-76.1,-32.62},{-82.62,-33.08},{-89.24,-35.06},{-91.62,-36.86},{-93.28,-39.5},{-96,-53.26},{-97.54,-56.08},{-100.84,-58.36},{-105.82,-59.86},{-111.26,-60.34},{-117.3,-59.38},{-121.56,-57.6},{-124.16,-55.52},{-126.18,-53.08},{-126.54,-50.44},{-125.7,-47.6},{-122.4,-42.98},{-105,-21.78},{-99.42,-17.72},{-93.98,-14.32},{-86.16,-10.18},{-79.78,-7.44},{-71.72,-5.36},{-64.74,-3.96},{-49.94,-2.82},{0,0} };
-
+	int sizedarr[135][2];
 	sf::VertexArray path(sf::LinesStrip, 135);
-
-	sf::Color c = sf::Color::Black;
-
+	sf::Color c = sf::Color::Magenta;
 	//initial positioning
-	for (int i = 0; i < 135; i++) {
-		path[i].position = sf::Vector2f(arr[i][0]+adjustx,arr[i][1]+adjusty);
+	for (int i = 134; i >= 0; i--) {
+		path[i].position = sf::Vector2f(arr[i][1] + adjustx, arr[i][0] + adjusty);
 		path[i].color = c;
 
+	}
+
+	//DRS Zone 1
+	int arrDrs1[2][2] = { {arr[105][0],arr[105][1]},{arr[106][0],arr[106][1]} };
+	sf::VertexArray drspath(sf::LinesStrip, 2);
+	for (int i = 0; i < 2; i++) {
+		drspath[i].position = sf::Vector2f(arrDrs1[i][1] + adjustx , arrDrs1[i][0] + adjusty );
+		drspath[i].color = sf::Color::Green;
+	}
+
+	//DRS Zone 2
+	int arrDrs2[2][2] = { {arr[34][0],arr[34][1]},{arr[35][0],arr[35][1]} };
+	sf::VertexArray drspath2(sf::LinesStrip, 2);
+	for (int i = 0; i < 2; i++) {
+		drspath2[i].position = sf::Vector2f(arrDrs2[i][1] + adjustx , arrDrs2[i][0] + adjusty);
+		drspath2[i].color = sf::Color::Green;
 	}
 
 	int sizeSet = 0;
@@ -41,12 +57,19 @@ int main(int argc, char** argv[]) {
 			}
 
 			if (sizeSet != sizeSlider) {
-				for (int i = 0; i < 135; i++) {
-					path[i].position = sf::Vector2f((arr[i][0]*sizeSlider) + adjustx, (arr[i][1]*sizeSlider) + adjusty);
+				for (int i = 134; i >= 0; i--) {
+					path[i].position = sf::Vector2f((arr[i][1] * sizeSlider) + adjustx, (arr[i][0] * sizeSlider) + adjusty);
 					path[i].color = c;
 					sizeSet = sizeSlider;
 				}
+				for (int i = 0; i < 2; i++) {
+					drspath[i].position = sf::Vector2f(arrDrs1[i][1] * sizeSlider + adjustx, arrDrs1[i][0] * sizeSlider + adjusty);
+					drspath[i].color = sf::Color::Green;
+					drspath2[i].position = sf::Vector2f(arrDrs2[i][1] * sizeSlider + adjustx, arrDrs2[i][0] * sizeSlider + adjusty);
+					drspath2[i].color = sf::Color::Green;
+				}
 			}
+
 
 
 
@@ -54,15 +77,13 @@ int main(int argc, char** argv[]) {
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		
-
 
 
 		ImGui::Begin("Lap Simulation");
 		ImGui::Text("Lap Simulation");
 
 		ImGui::Checkbox("Begin", &start);
-		ImGui::SliderInt("Horizontal", &horizontalSlider,-200,200);
+		ImGui::SliderInt("Horizontal", &horizontalSlider, -200, 200);
 		ImGui::SliderInt("Vertical", &verticalSlider, -200, 200);
 		ImGui::SliderFloat("Size", &sizeSlider, 1, 2);
 
@@ -70,9 +91,11 @@ int main(int argc, char** argv[]) {
 
 
 
-		window.clear(sf::Color::White);
+		window.clear(sf::Color::Black);
 
 		window.draw(path);
+		window.draw(drspath);
+		window.draw(drspath2);
 
 		ImGui::SFML::Render(window);
 		window.display();
