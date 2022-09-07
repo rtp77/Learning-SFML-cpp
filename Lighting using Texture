@@ -1,0 +1,200 @@
+/*This created program is just part of exploring SFML and 2D graphics, so it does not follow a particular set
+of algorithms or methods to implement light. The light is created by modifying the texture's setPixel */
+
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include "imgui.h"
+#include "imgui-SFML.h"
+
+int loopCount = 0;
+const int width = 1500;
+const int height = 800;
+
+int main()
+{
+	//Setup Window
+	sf::RenderWindow window(sf::VideoMode(width,height), "Light");
+	ImGui::SFML::Init(window);
+	window.setVerticalSyncEnabled(true);
+
+	//VARIABLES//
+	bool main = false;
+	bool clear = false;
+	int brushSize = 800;
+	float redShade = 1, greenShade = 1, blueShade = 1;
+	float redS = 0, greenS = 0, blueS = 0;
+
+	//Texture for Image
+	sf::Texture texture;
+	if (!texture.create(width, height)){std::cout << "Fail to create the texture";}
+	sf::Image image;
+	image.create(width, height, sf::Color::Black);
+	texture.update(image);
+	sf::Sprite sprite;
+	sprite.setTexture(texture);
+
+	//Box
+	sf::RectangleShape box(sf::Vector2f(100, 100));
+	box.setOrigin(0, 0);
+	box.setPosition(700, 400);
+	box.setFillColor(sf::Color::Yellow);
+	bool once = true;
+
+	//cursor
+	sf::RectangleShape ver(sf::Vector2f(1, 20));
+	ver.setOrigin(1, 10);
+	ver.setFillColor(sf::Color::White);
+	sf::RectangleShape hor(sf::Vector2f(20,1));
+	hor.setOrigin(10, 1);
+	ver.setFillColor(sf::Color::White);
+
+	sf::Clock deltaClock;
+
+	while (window.isOpen())
+	{
+
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			ImGui::SFML::ProcessEvent(event);
+			if (event.type == sf::Event::Closed)
+				window.close();
+
+			//Mouse Scroll Light sizing
+			if (event.type == sf::Event::MouseWheelMoved) {
+				if (event.mouseWheel.delta > 0) { brushSize += 50; }
+				if (event.mouseWheel.delta < 0) { brushSize -= 50; }
+			}
+
+
+		}//POLL EVENT//
+		ImGui::SFML::Update(window, deltaClock.restart());
+		int Mx = sf::Mouse::getPosition(window).x;
+		int My = sf::Mouse::getPosition(window).y;
+
+		//SCREEN CLEAR refreshing
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				sf::Color transparent(0, 0, 0);
+				image.setPixel(i, j, transparent);
+			}
+		}
+		
+		//MAIN CURSOR
+		if (main == true) {
+			int Mx = sf::Mouse::getPosition(window).x;
+			int My = sf::Mouse::getPosition(window).y;
+			ver.setPosition(Mx, My);
+			hor.setPosition(Mx, My);
+		}
+		if (main == false) {
+			ver.setPosition(0, 0);
+			hor.setPosition(0, 0);
+		}
+
+		//BOX 
+		if (once == true) {
+			int side = 100;
+			box.setSize(sf::Vector2f(side, side));
+			int boxX = 700, boxY = 400;
+			box.setPosition(boxX,boxY);
+			once = false;
+		}
+		
+
+		//LIGHT CODE
+		if (main == true && Mx > 1 && Mx < width - 1 && My>1 && My < height - 1) {
+			float ratio1 = (float)brushSize / (float)255;
+
+			for (int i = Mx - brushSize; i < Mx + brushSize; i++) {
+				for (int j = My - brushSize; j < My + brushSize; j++) {
+					if (i > 0 && i < width && j>0 && j < height) {
+
+						bool shadow = false;//Initial shadow false
+
+											
+						//TO REMOVE LIGHT INSIDE BOX
+						if (shadow == false) {
+							int tempx = abs(Mx - i), tempy = abs(My - j); //current x & y
+							int hypo = sqrt(tempx * tempx + tempy * tempy); //distance from light
+							if (hypo == 0) {//to exclude division by 0
+								hypo = 1;
+							}
+							float ratio2 = (float)hypo / (float)ratio1; //breakdown ratio for 255 to 0
+							redShade = 1 - redS; greenShade = 1 - greenS; blueShade = 1 - blueS; //color config
+              
+
+							//The following if statements are created just for the purpose of making the light look less like a image
+							//and more like something that is generated, it creates little circular sections throughout.
+
+							if (hypo < brushSize) {//circle lighting
+								if (ratio2 < brushSize * 0.05) {//inner strong
+									sf::Color colorF(255 - ratio2 * redShade, 255 - ratio2 * 0.99 * greenShade, 255 - ratio2 * 0.99 * blueShade);
+									image.setPixel(i, j, colorF);
+								}
+								if (ratio2 >= brushSize * 0.05 && ratio2 < brushSize * 0.12) {//inner strong
+									sf::Color colorF(255 - ratio2 * 0.995 * redShade, 255 - ratio2 * 0.995 * greenShade, 255 - ratio2 * 0.995 * blueShade);
+									image.setPixel(i, j, colorF);
+								}
+								if (ratio2 >= brushSize * 0.12 && ratio2 < brushSize * 0.15) {//inner strong
+									sf::Color colorF(255 - ratio2 * 0.99 * redShade, 255 - ratio2 * 0.99 * greenShade, 255 - ratio2 * 0.99 * blueShade);
+									image.setPixel(i, j, colorF);
+								}
+								if (ratio2 >= brushSize * 0.15 && ratio2 < brushSize * 0.19) {//inner strong
+									sf::Color colorF(255 - ratio2 * 0.995 * redShade, 255 - ratio2 * 0.995 * greenShade, 255 - ratio2 * 0.995 * blueShade);
+									image.setPixel(i, j, colorF);
+								}
+								if (ratio2 >= brushSize * 0.19) {//main
+									sf::Color colorF(255 - ratio2 * redShade, 255 - ratio2 * greenShade, 255 - ratio2 * blueShade);
+									image.setPixel(i, j, colorF);
+								}
+							}
+
+						}//shadow
+
+					}//inside the screen check
+				}//j++
+			}//i++
+		}//Brush True
+
+
+		//ADJUSTER
+		if (redShade != 1 || greenShade != 1 || blueShade != 1) {
+			if (brushSize < 1700) {
+				brushSize = 1700;}
+		}
+		if (brushSize > 1800) { brushSize = 1800; }
+
+
+
+		ImGui::Begin("Light Setting");
+		ImGui::Checkbox("Main Switch", &main);
+		ImGui::SliderInt("Light Size", &brushSize,0,1800);
+		ImGui::Text("NOTE: To change Size make sure RGB is set 1");
+		ImGui::SliderFloat("RED", &redS, 0, 1);
+		ImGui::SliderFloat("GREEN", &greenS, 0, 1);
+		ImGui::SliderFloat("BLUE", &blueS, 0, 1);
+		ImGui::Checkbox("CLEAR", &clear);
+		ImGui::End();
+
+
+		//Rendering
+		window.clear();
+		texture.update(image);
+		window.draw(sprite);
+		window.draw(box);
+		//window.draw(line1); window.draw(line2); window.draw(line3); window.draw(line4);
+		ImGui::SFML::Render(window);
+		window.draw(ver); window.draw(hor);
+		window.display();
+	}
+
+	ImGui::SFML::Shutdown();
+	return 0;
+
+}
+
+
+
+
+
